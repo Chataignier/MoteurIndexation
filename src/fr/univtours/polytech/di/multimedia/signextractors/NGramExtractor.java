@@ -20,7 +20,9 @@ public class NGramExtractor implements SignExtractor {
    */
   @Override
   public String nextToken() {
-    // TODO : A COMPLETER ICI
+    
+
+	  System.out.println("C'est le soui ici");
     return null;
   }
 
