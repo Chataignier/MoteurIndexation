@@ -1,5 +1,6 @@
 package fr.univtours.polytech.di.multimedia.signextractors;
 
+import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 
@@ -9,7 +10,7 @@ import java.util.StringTokenizer;
  */
 public class WordExtractor implements SignExtractor {
 
-	private StringTokenizer phrase;
+	private StringTokenizer doc;
 	
   /**
    * {@inheritDoc}
@@ -17,8 +18,11 @@ public class WordExtractor implements SignExtractor {
    */
   @Override
   public String nextToken() {	
-	  String test = "lol";
-	return phrase.nextToken();
+	try{
+		return doc.nextToken();
+	}catch (NoSuchElementException nsee){
+		return null;
+	}
     
   }
 
@@ -28,6 +32,6 @@ public class WordExtractor implements SignExtractor {
    */
   @Override
   public void setContent(final String content) {
-    this.phrase = new StringTokenizer(content, " \t\n\r\f,.:;?![]'");;
+    this.doc = new StringTokenizer(content, " ");;
     }
 }

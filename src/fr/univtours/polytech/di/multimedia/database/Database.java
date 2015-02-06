@@ -22,6 +22,7 @@ import javax.swing.JTextArea;
 import fr.univtours.polytech.di.multimedia.MainFrame;
 import fr.univtours.polytech.di.multimedia.filters.Filter;
 import fr.univtours.polytech.di.multimedia.signextractors.SignExtractor;
+import fr.univtours.polytech.di.multimedia.signextractors.WordExtractor;
 
 /**
  * Classe représentant la base de données des documents.
@@ -246,7 +247,13 @@ public class Database {
    * @param document le document à indexer
    */
   private void indexDocument(final Document document) {
-    // TODO : A COMPLETER ICI
+    
+    signExtractor.setContent(document.getContent());
+    String sign;
+    
+    while((sign = signExtractor.nextToken()) != null){
+    	System.out.println(sign + "\nquenelle");
+    }
   }
 
   /**

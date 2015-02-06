@@ -6,6 +6,7 @@ package fr.univtours.polytech.di.multimedia.signextractors;
  * @author Sébastien Aupetit
  */
 public interface SignExtractor {
+	
   /**
    * Permet d'obtenir le signe suivant.
    * @return le signe ou null s'il n'y a plus de signes à extraire

@@ -6,12 +6,13 @@ package fr.univtours.polytech.di.multimedia.signextractors;
  */
 public class NGramExtractor implements SignExtractor {
 
+	private final int size;
   /**
    * Le constructeur.
    * @param size la taille des N-grams
    */
   public NGramExtractor(final int size) {
-    // TODO : A COMPLETER ICI
+    this.size = size;
   }
 
   /**
