@@ -1,5 +1,7 @@
 package fr.univtours.polytech.di.multimedia.signextractors;
 
+import java.util.StringTokenizer;
+
 
 /**
  * Classe permettant d'extraite des mots à partir d'une chaîne de caractères.
@@ -7,14 +9,17 @@ package fr.univtours.polytech.di.multimedia.signextractors;
  */
 public class WordExtractor implements SignExtractor {
 
+	private StringTokenizer phrase;
+	
   /**
    * {@inheritDoc}
    * @see fr.univtours.polytech.di.multimedia.signextractors.SignExtractor#nextToken()
    */
   @Override
-  public String nextToken() {
-    // TODO : A COMPLETER ICI
-    return null;
+  public String nextToken() {	
+	  String test = "lol";
+	return phrase.nextToken();
+    
   }
 
   /**
@@ -23,6 +28,6 @@ public class WordExtractor implements SignExtractor {
    */
   @Override
   public void setContent(final String content) {
-    // TODO : A COMPLETER ICI
-  }
+    this.phrase = new StringTokenizer(content, " \t\n\r\f,.:;?![]'");;
+    }
 }
