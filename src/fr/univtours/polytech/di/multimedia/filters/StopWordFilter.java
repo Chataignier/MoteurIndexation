@@ -7,6 +7,8 @@ package fr.univtours.polytech.di.multimedia.filters;
  */
 public class StopWordFilter implements Filter {
 
+	private String[] stopWord = {" "};
+	
   /**
    * Le constructeur.
    * @param caseFilterApplied indique si les signes ont été filtrés en minuscule
@@ -15,7 +17,21 @@ public class StopWordFilter implements Filter {
    */
   public StopWordFilter(final boolean caseFilterApplied,
       final boolean accentFilterApplied) {
-    // TODO : A COMPLETER ICI
+	  
+	  CaseFilter cf = new CaseFilter();
+	  AccentFilter af = new AccentFilter();
+	  
+	  for (int i=0 ; i < stopWord.length ; i++) {
+		  if(!caseFilterApplied) {
+			  //Faire le filtre case
+			  stopWord[i] = cf.filter(stopWord[i]);
+		  }
+		  if(!accentFilterApplied) {
+			  //Faire le filtre accent
+			  stopWord[i] = af.filter(stopWord[i]);
+		  }
+	  }
+	  
   }
 
   /**
@@ -24,8 +40,13 @@ public class StopWordFilter implements Filter {
    */
   @Override
   public String filter(final String sign) {
-    // TODO : A COMPLETER ICI
-    return sign;
+	  
+	  for(int i=0 ; i < stopWord.length ; i++ ) {
+		  if(stopWord[i].equals(sign)) {
+			  return "";
+		  }
+	  }
+	  return sign;
   }
 
 }
