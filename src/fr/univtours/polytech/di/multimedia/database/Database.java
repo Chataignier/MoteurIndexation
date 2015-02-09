@@ -249,12 +249,20 @@ public class Database {
   private void indexDocument(final Document document) {
     
     signExtractor.setContent(document.getContent());
-    String sign;
+    String nGram;
     
-    while((sign = signExtractor.nextToken()) != null){
-    	System.out.println(sign + "\nquenelle");
+    while((nGram = signExtractor.nextToken()) != null){
+    	//On filtre les nGrams
+    	nGram = filterSign(nGram);
+    	System.out.println(nGram);
+    	//On incrémente l'occurence du mot pour les statistiques
+    	invertedIndex.setWordOccurrence(
+    			  nGram,
+				  document,
+				  invertedIndex.getWordOccurrences(nGram, document)+1.0);
+	  }
     }
-  }
+  
 
   /**
    * Charge les documents du sous répertoire pages.

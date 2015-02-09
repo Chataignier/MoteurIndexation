@@ -32,6 +32,6 @@ public class WordExtractor implements SignExtractor {
    */
   @Override
   public void setContent(final String content) {
-    this.doc = new StringTokenizer(content, " ");;
+    this.doc = new StringTokenizer(content, " ");
     }
 }
