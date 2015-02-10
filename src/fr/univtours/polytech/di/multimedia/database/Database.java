@@ -247,29 +247,7 @@ public class Database {
    * @param document le document à indexer
    */
   private void indexDocument(final Document document) {
-	  
-	  signExtractor.setContent(document.getContent());
-	  
-	  String sign = null;
-	  //On extrait les token du document
-	  while((sign = signExtractor.nextToken()) != null) {
-		  //filtrage
-		  sign = filterSign(sign);
-		  
-		  //On incrémente l'occurence
-		  invertedIndex.setWordOccurrence(
-				  sign, 
-				  document, 
-				  invertedIndex.getWordOccurrences(sign, document)+1.0);
-	  }
-	  
-    //TODO a faire
-    /*signExtractor.setContent(document.getContent());
-    String sign;
-    
-    while((sign = signExtractor.nextToken()) != null){
-    	System.out.println(sign + "\nquenelle");
-    }*/
+
   }
 
   /**
