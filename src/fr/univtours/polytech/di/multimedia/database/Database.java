@@ -248,6 +248,19 @@ public class Database {
    */
   private void indexDocument(final Document document) {
 
+	    signExtractor.setContent(document.getContent());
+	    String nGram;
+	    
+	    while((nGram = signExtractor.nextToken()) != null){
+	    	//On filtre les nGrams
+	    	nGram = filterSign(nGram);
+	    	System.out.println(nGram);
+	    	//On incrémente l'occurence du mot pour les statistiques
+	    	invertedIndex.setWordOccurrence(
+	    			  nGram,
+					  document,
+					  invertedIndex.getWordOccurrences(nGram, document)+1.0);
+		  }
   }
 
   /**
