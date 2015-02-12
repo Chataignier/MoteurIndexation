@@ -9,7 +9,10 @@ import fr.univtours.polytech.di.multimedia.database.DecreasingValuedObjectCompar
 import fr.univtours.polytech.di.multimedia.database.Document;
 import fr.univtours.polytech.di.multimedia.database.InvertedIndex;
 import fr.univtours.polytech.di.multimedia.database.ValuedObject;
+import fr.univtours.polytech.di.multimedia.parser.ExpressionParser;
 import fr.univtours.polytech.di.multimedia.signextractors.SignExtractor;
+
+import org.antlr.runtime.tree.Tree;
 
 /**
  * Classe implémentant le modèle d'interrogation vectoriel.
@@ -37,58 +40,87 @@ public class VectorQueryModel extends QueryModel {
   public List < ValuedObject > getAnswers(final String question) {
     final List < ValuedObject > results = new ArrayList < ValuedObject >();
     
-    int nombreDocs = getDatabase().getDocuments().size();
+    int nombreDocs = getDatabase().getDocuments().size(); //Nombre de documents
+    String sign; //sign temporaire
+    Double docScore; //score temporaire
+    ValuedObject valuedObject;
+    ArrayList<String> words = new ArrayList<String>(); //Liste de mots de la question
+    InvertedIndex invertedIndex = getDatabase().getInvertedIndex(); // index inversé
+    /*Tree tree;
+    tree = ExpressionParser.parseQuery(question);*/
     
-    //Extraction des mots de la question
-    ArrayList<String> words = new ArrayList<String>();
+    //Extraction des mots
     SignExtractor signExtractor = getDatabase().getSignExtractor();
     signExtractor.setContent(question);
-    String word;
-    while ((word = signExtractor.nextToken()) != null) {
-		//application des filtres sur chaque signe extrait 
-		word = getDatabase().filterSign(word);
-		words.add(word);
+    while ((sign = signExtractor.nextToken()) != null) 
+    {
+    	//Ajout avec application du filtre
+    	words.add(getDatabase().filterSign(sign));
 	}
-    
     
     //Liste des documents indexé : documentsIndex
-    InvertedIndex invertedIndex = getDatabase().getInvertedIndex();
 	List<Document> documentsIndex = new ArrayList<Document>();
-	
-	for (String sign : words) {
-		documentsIndex.addAll(invertedIndex.getAllDocuments(sign));
+	for (String word : words) {
+		documentsIndex.addAll(invertedIndex.getAllDocuments(word));
 	}
-    
+	
+	//Attention au negation supprimer les mot avec -
 	//Pacours de chaque document
 	for(Document document : documentsIndex) {
-		double somme = 0.0;
-		double sommeCarre = 0.0;
-		double sommeWord = 0.0;
-		//Parcours de chaque sign de la question
-		for(String sign : words) {
-			double occurence = invertedIndex.getWordOccurrences(sign, document);
-			sommeWord++;
-			if(occurence != 0) {
-				if(useTFIDF) {
-					int nbDocs = invertedIndex.getAllDocuments(sign).size();
-					occurence = occurence * (nombreDocs / nbDocs);
-				}
-				somme += occurence;
-				sommeCarre += (occurence * occurence);
-			}
-		}
-		if(somme != 0) {
-			double normes = Math.sqrt(sommeCarre) * Math.sqrt(sommeWord);
-			double cos = (normes == 0 ? 0 : somme / normes);
-			results.add(new ValuedObject(document, cos));
+		
+		if(this.useTFIDF) {
+			docScore = 0.0;
+			//calcul score avec TDIDF
+		} else {
+			docScore = getScoreNotTDIDF(document, words);
+			//Calcul score sans TDIDF
 		}
 		
+		//Ajout du score
+		if(docScore != 0.0) {
+			valuedObject = new ValuedObject(document, docScore);
+			results.add(valuedObject);
+		}
 	}
 	
+	//Tri des réponses
 	Collections.sort(results, new DecreasingValuedObjectComparator());
 
-    // TODO : A COMPLETER ICI
-
     return results;
+  
+	}
+  
+  private double getScoreTDIDF(Document document, ArrayList<String> words) {
+	  
+	return 0;
+	  
+  }
+  
+  private double getScoreNotTDIDF(Document document, ArrayList<String> words) {
+	  	
+	  	double cosinus = 0;
+		double sommeOccurence = 0;
+		double norme;
+		double squareSomme = 0;
+	  	
+	  	//Parcour des signes
+		for (int i = 0; i < words.size(); ++i) {
+			
+			 //Somme des occurrences des signes dans le document
+			sommeOccurence += this.getDatabase().getInvertedIndex().getWordOccurrences(words.get(i), document);
+			
+			 
+			// Numérateur au carré, utile pour le dénominateur dans la formule du cosinus
+			squareSomme += Math.pow(sommeOccurence, 2);
+					
+		}
+		
+		//Cosinus
+		norme = (Math.sqrt(words.size()) * Math.sqrt(squareSomme));
+		if(norme == 0) {
+			return 0.0;
+		}
+			
+		return sommeOccurence / norme;
   }
 }
