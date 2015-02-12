@@ -18,6 +18,9 @@ public class StopWordFilter implements Filter {
   public StopWordFilter(final boolean caseFilterApplied,
       final boolean accentFilterApplied) {
 	  
+	  //recupération de la liste stopWord avec l'onglet stats
+	  //getOverallWordOccurrences
+	  
 	  CaseFilter cf = new CaseFilter();
 	  AccentFilter af = new AccentFilter();
 	  

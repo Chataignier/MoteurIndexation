@@ -14,7 +14,7 @@ public class StemmingFilter implements Filter {
    */
   @Override
   public String filter(final String sign) {
-	  //reduction du pluriel, reduction des adverbes.
+	  //reduction du pluriel et des adverbes.
 	  for(int i=0 ; i < stem.length ; i++) {
 		  if(sign.endsWith(stem[i])) {
 			  String tmpSign = (String) sign.subSequence(0, sign.length() - stem[i].length());
