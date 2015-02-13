@@ -60,7 +60,12 @@ public class VectorQueryModel extends QueryModel {
     //Liste des documents indexé : documentsIndex
 	List<Document> documentsIndex = new ArrayList<Document>();
 	for (String word : words) {
-		documentsIndex.addAll(invertedIndex.getAllDocuments(word));
+		for(Document doc : invertedIndex.getAllDocuments(word)) {
+			if(!(documentsIndex.contains(doc))) {
+				documentsIndex.add(doc);
+			}
+		}
+		//documentsIndex.addAll(invertedIndex.getAllDocuments(word));
 	}
 	
 	//Attention au negation supprimer les mot avec -
@@ -143,8 +148,8 @@ public class VectorQueryModel extends QueryModel {
 			 //Somme des occurrences des signes dans le document
 			sommeOccurence += this.getDatabase().getInvertedIndex().getWordOccurrences(words.get(i), document);
 			
-			// Numérateur au carré, utile pour le dénominateur dans la formule du cosinus
-			squareSomme += Math.pow(sommeOccurence, 2);
+			// on le met au carré
+			squareSomme += (sommeOccurence * sommeOccurence);
 					
 		}
 		
