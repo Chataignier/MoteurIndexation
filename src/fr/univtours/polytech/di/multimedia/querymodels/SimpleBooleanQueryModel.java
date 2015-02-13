@@ -21,7 +21,6 @@ public class SimpleBooleanQueryModel extends QueryModel {
    */
   public SimpleBooleanQueryModel(final Database database) {
     super(database);
-    // TOTO : A COMPLETER ICI
   }
 
   /**
@@ -45,34 +44,23 @@ public class SimpleBooleanQueryModel extends QueryModel {
     	words.add(getDatabase().filterSign(sign));
 	}
     
-    /*
-	 * On parcours l'ensemble des documents
-	 */
+    //ensemble des docs
 	for (Document document : documents) {
 		
-		double matchedSign = 0;
-		/*
-		 * Pour chaque signe de la requete
-		 */
+		double contient = 0;
+
 		for (int i = 0; i < words.size(); ++i) {
 			
 			//On verifie si le signe est présent dans le document
 			if ((this.getDatabase().getInvertedIndex().getWordOccurrences(words.get(i), document)) >= 1) {
-				/*
-				 * Le signe est contenu dans le document. On indique que le
-				 * signe 'match' le document
-				 */
-				matchedSign++;
+				//on l'ajoute au compteur
+				contient++;
 			} else {
 				continue;
 			}
 		}
 		
-		/*
-		 * Le document est dit "pertinent" s'il contient tous les signes de
-		 * la requête. On affecte 1 (Vrai) si tel est le cas.
-		 */
-		if (matchedSign == words.size()) {
+		if (contient == words.size()) {
 			results.add(new ValuedObject(document, 1.0));
 		}
 	}

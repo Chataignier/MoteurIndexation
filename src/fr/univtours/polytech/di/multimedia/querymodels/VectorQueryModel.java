@@ -40,66 +40,8 @@ public class VectorQueryModel extends QueryModel {
   public List < ValuedObject > getAnswers(final String question) {
     final List < ValuedObject > results = new ArrayList < ValuedObject >();
     
-    ArrayList<String> querySigns = new ArrayList<String>();
-	String querySign;
-	ValuedObject object;
-	double currentScore;
-
-	/*
-	 * On extrait les signes de la requête
-	 */
-	SignExtractor extractor = this.getDatabase().getSignExtractor();
-	extractor.setContent(question);
-
-	/*
-	 * Pour chaque signe extrait de la requête, on applique les filtres
-	 */
-	while ((querySign = extractor.nextToken()) != null) {
-		querySigns.add(this.getDatabase().filterSign(querySign));			
-	}
-	
-	/*
-	 * On parcours l'ensemble des documents
-	 */
-	for (Document currentDocument : this.getDatabase().getDocuments()) {
-
-		if (this.useTFIDF) {
-
-			/*
-			 * Calcule du score avec TF-IDF
-			 */
-			currentScore = getScoreTDIDF(currentDocument, querySigns);
-
-		} else {
-
-			/*
-			 * Calcule du score sans TF-IDF
-			 */
-			currentScore = getScoreNotTDIDF(currentDocument, querySigns);
-
-		}
-
-		/*
-		 *  On ajoute le résultat aux réponses
-		 */
-		if (currentScore != 0.0) {
-			/*
-			 * Création de l'objet à ajouter dans les réponses
-			 */
-			object = new ValuedObject(currentDocument, currentScore);
-			results.add(object);
-		}
-
-	}
-
-	/*
-	 *  La liste des réponses est triée par pertinance décroissante
-	 */
-	Collections.sort(results, new DecreasingValuedObjectComparator());
-
-	return results;
     
-    /*int nombreDocs = getDatabase().getDocuments().size(); //Nombre de documents
+    int nombreDocs = getDatabase().getDocuments().size(); //Nombre de documents
     String sign; //sign temporaire
     Double docScore; //score temporaire
     ValuedObject valuedObject;
@@ -141,7 +83,7 @@ public class VectorQueryModel extends QueryModel {
 	//Tri des réponses
 	Collections.sort(results, new DecreasingValuedObjectComparator());
 
-    return results;*/
+    return results;
   
 	}
   
@@ -191,7 +133,7 @@ public class VectorQueryModel extends QueryModel {
    */
   private double getScoreNotTDIDF(Document document, ArrayList<String> words) {
 	  	
-	  	/*double cosinus = 0;
+	  	double cosinus = 0;
 		double sommeOccurence = 0;
 		double norme;
 		double squareSomme = 0;
@@ -212,44 +154,6 @@ public class VectorQueryModel extends QueryModel {
 			return 0.0;
 		}
 			
-		return sommeOccurence / norme;*/
-	  double cosinus = 0;
-		double numerateur = 0;
-		double squareNumerateur = 0;
-		int querySize = words.size(); // taille de la requête
-
-		/*
-		 *  On parcours chacun des signes de la requête
-		 */
-		for (int i = 0; i < querySize; ++i) {
-
-			/*
-			 *  Calcule du numérateur
-			 *  Somme des occurrences des signes dans le document
-			 */ 
-			numerateur += this.getDatabase().getInvertedIndex()
-					.getWordOccurrences(words.get(i), document);
-			
-			/* 
-			 * Numérateur au carré, utile pour le dénominateur dans la formule
-			 * du cosinus
-			 */
-			squareNumerateur += (numerateur * numerateur);
-		}
-
-		/*
-		 *  Formule du cosinus
-		 */
-		cosinus = numerateur
-				/ (Math.sqrt(querySize) * Math.sqrt(squareNumerateur));
-
-		/*
-		 *  On ramène le score à zéro de le cas de résultats égaux à NaN
-		 *  Cela permet de rendre possible le tri des réponses par la suite
-		 */
-		if (Double.isNaN(cosinus))
-			cosinus = 0.;
-
-		return cosinus;
+		return sommeOccurence / norme;
   }
 }
