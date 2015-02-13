@@ -6,7 +6,25 @@ package fr.univtours.polytech.di.multimedia.filters;
  */
 public class StemmingFilter implements Filter {
 
-	private String[] stem = {};
+	private String[] stem = {
+			"ance", 
+			"ique", 
+			"isme", 
+			"able", 
+			"iste", 
+			"eux",
+			"ances", 
+			"iques", 
+			"ismes", 
+			"ables", 
+			"istes", 
+			"atrice", 
+			"ateur",
+			"ation", 
+			"atrices", 
+			"ateurs", 
+			"ations" 
+		};
 	
   /**
    * {@inheritDoc}
