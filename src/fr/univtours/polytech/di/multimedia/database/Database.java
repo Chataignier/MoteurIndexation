@@ -254,7 +254,7 @@ public class Database {
 	    while((nGram = signExtractor.nextToken()) != null){
 	    	//On filtre les nGrams
 	    	nGram = filterSign(nGram);
-	    	System.out.println(nGram);
+	    	//System.out.println(nGram);
 	    	//On incrémente l'occurence du mot pour les statistiques
 	    	invertedIndex.setWordOccurrence(
 	    			  nGram,

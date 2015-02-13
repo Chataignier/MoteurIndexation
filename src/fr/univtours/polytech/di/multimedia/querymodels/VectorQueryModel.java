@@ -40,14 +40,71 @@ public class VectorQueryModel extends QueryModel {
   public List < ValuedObject > getAnswers(final String question) {
     final List < ValuedObject > results = new ArrayList < ValuedObject >();
     
-    int nombreDocs = getDatabase().getDocuments().size(); //Nombre de documents
+    ArrayList<String> querySigns = new ArrayList<String>();
+	String querySign;
+	ValuedObject object;
+	double currentScore;
+
+	/*
+	 * On extrait les signes de la requête
+	 */
+	SignExtractor extractor = this.getDatabase().getSignExtractor();
+	extractor.setContent(question);
+
+	/*
+	 * Pour chaque signe extrait de la requête, on applique les filtres
+	 */
+	while ((querySign = extractor.nextToken()) != null) {
+		querySigns.add(this.getDatabase().filterSign(querySign));			
+	}
+	
+	/*
+	 * On parcours l'ensemble des documents
+	 */
+	for (Document currentDocument : this.getDatabase().getDocuments()) {
+
+		if (this.useTFIDF) {
+
+			/*
+			 * Calcule du score avec TF-IDF
+			 */
+			currentScore = getScoreTDIDF(currentDocument, querySigns);
+
+		} else {
+
+			/*
+			 * Calcule du score sans TF-IDF
+			 */
+			currentScore = getScoreNotTDIDF(currentDocument, querySigns);
+
+		}
+
+		/*
+		 *  On ajoute le résultat aux réponses
+		 */
+		if (currentScore != 0.0) {
+			/*
+			 * Création de l'objet à ajouter dans les réponses
+			 */
+			object = new ValuedObject(currentDocument, currentScore);
+			results.add(object);
+		}
+
+	}
+
+	/*
+	 *  La liste des réponses est triée par pertinance décroissante
+	 */
+	Collections.sort(results, new DecreasingValuedObjectComparator());
+
+	return results;
+    
+    /*int nombreDocs = getDatabase().getDocuments().size(); //Nombre de documents
     String sign; //sign temporaire
     Double docScore; //score temporaire
     ValuedObject valuedObject;
     ArrayList<String> words = new ArrayList<String>(); //Liste de mots de la question
     InvertedIndex invertedIndex = getDatabase().getInvertedIndex(); // index inversé
-    /*Tree tree;
-    tree = ExpressionParser.parseQuery(question);*/
     
     //Extraction des mots
     SignExtractor signExtractor = getDatabase().getSignExtractor();
@@ -69,11 +126,9 @@ public class VectorQueryModel extends QueryModel {
 	for(Document document : documentsIndex) {
 		
 		if(this.useTFIDF) {
-			docScore = 0.0;
-			//calcul score avec TDIDF
+			docScore =  getScoreTDIDF(document, words); //calcul score avec TDIDF
 		} else {
-			docScore = getScoreNotTDIDF(document, words);
-			//Calcul score sans TDIDF
+			docScore = getScoreNotTDIDF(document, words); //Calcul score sans TDIDF
 		}
 		
 		//Ajout du score
@@ -86,30 +141,66 @@ public class VectorQueryModel extends QueryModel {
 	//Tri des réponses
 	Collections.sort(results, new DecreasingValuedObjectComparator());
 
-    return results;
+    return results;*/
   
 	}
   
+  /**
+   * 
+   * @param document
+   * @param words
+   * @return
+   */
   private double getScoreTDIDF(Document document, ArrayList<String> words) {
 	  
-	return 0;
-	  
+	  	double internalWeight = 0;
+	  	double externalWeight = 0; 
+	  	double result = 0;
+		double nbTotalDocs = this.getDatabase().getDocuments().size();
+		
+		//Parcours des signes
+		for (int i = 0; i < words.size(); ++i) {
+
+			//Si le document n'apparait pas : log 0 impossible)
+			if (!((internalWeight = this.getDatabase().getInvertedIndex().getWordOccurrences(words.get(i), document)) == 0)) {
+				
+				// Calcule du poids interne
+				internalWeight = 1 + Math.log(internalWeight);
+			}
+
+			//Calcule du poids externe
+			externalWeight = Math.log(nbTotalDocs / this.getDatabase().getInvertedIndex().getOverallWordOccurrences(words.get(i)));
+
+			// On somme le résultat du tf-idf
+			result += (internalWeight * externalWeight);
+		}
+		
+		// On retourne le résultat que s'il est positif sinon 0
+		if(Double.isNaN(result) || result <= 0) {
+			return 0.;
+		}
+		
+		return result;  
   }
   
+  /**
+   * 
+   * @param document
+   * @param words
+   * @return
+   */
   private double getScoreNotTDIDF(Document document, ArrayList<String> words) {
 	  	
-	  	double cosinus = 0;
+	  	/*double cosinus = 0;
 		double sommeOccurence = 0;
 		double norme;
 		double squareSomme = 0;
-	  	
-	  	//Parcour des signes
+		
+	  	//Parcours des signes
 		for (int i = 0; i < words.size(); ++i) {
-			
 			 //Somme des occurrences des signes dans le document
 			sommeOccurence += this.getDatabase().getInvertedIndex().getWordOccurrences(words.get(i), document);
 			
-			 
 			// Numérateur au carré, utile pour le dénominateur dans la formule du cosinus
 			squareSomme += Math.pow(sommeOccurence, 2);
 					
@@ -121,6 +212,44 @@ public class VectorQueryModel extends QueryModel {
 			return 0.0;
 		}
 			
-		return sommeOccurence / norme;
+		return sommeOccurence / norme;*/
+	  double cosinus = 0;
+		double numerateur = 0;
+		double squareNumerateur = 0;
+		int querySize = words.size(); // taille de la requête
+
+		/*
+		 *  On parcours chacun des signes de la requête
+		 */
+		for (int i = 0; i < querySize; ++i) {
+
+			/*
+			 *  Calcule du numérateur
+			 *  Somme des occurrences des signes dans le document
+			 */ 
+			numerateur += this.getDatabase().getInvertedIndex()
+					.getWordOccurrences(words.get(i), document);
+			
+			/* 
+			 * Numérateur au carré, utile pour le dénominateur dans la formule
+			 * du cosinus
+			 */
+			squareNumerateur += (numerateur * numerateur);
+		}
+
+		/*
+		 *  Formule du cosinus
+		 */
+		cosinus = numerateur
+				/ (Math.sqrt(querySize) * Math.sqrt(squareNumerateur));
+
+		/*
+		 *  On ramène le score à zéro de le cas de résultats égaux à NaN
+		 *  Cela permet de rendre possible le tri des réponses par la suite
+		 */
+		if (Double.isNaN(cosinus))
+			cosinus = 0.;
+
+		return cosinus;
   }
 }
